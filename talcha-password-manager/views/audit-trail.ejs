@@ -1,0 +1,238 @@
+<!-- views/audit-trail.ejs -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Security Audit Trail - Password Manager</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    .audit-container {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 1rem;
+      margin-bottom: 15px;
+    }
+
+    .filters {
+      background: #f8f8f8;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      flex: 1;
+      min-width: 150px;
+    }
+
+    .filter-group label {
+      font-size: 0.9rem;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .filter-group select,
+    .filter-group input[type="date"] {
+      width: 100%;
+      padding: 6px;
+      border: 1px solid #ccc;
+      font-size: 0.9rem;
+    }
+
+    button, .button {
+      padding: 8px 15px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    button {
+      background: #007bff;
+      color: #fff;
+      border: none;
+    }
+
+    .button.secondary {
+      background: #fff;
+      color: #333;
+      border: 1px solid #ccc;
+    }
+
+    .audit-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid #ddd;
+    }
+
+    .audit-table th,
+    .audit-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      font-size: 0.9rem;
+    }
+
+    .audit-table th {
+      background: #e8ecef;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 15px;
+      background: #fff;
+      border: 1px solid #ddd;
+    }
+
+    .pagination {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .pagination a {
+      color: #007bff;
+      margin: 0 10px;
+      text-decoration: none;
+    }
+
+    .security-info {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fff;
+      border: 1px solid #ddd;
+    }
+
+    .security-info ul {
+      margin: 10px 0 0 20px;
+    }
+
+    .action-view { color: #007bff; }
+    .action-create { color: #28a745; }
+    .action-update { color: #ffc107; }
+    .action-delete { color: #dc3545; }
+    .action-export { color: #6f42c1; }
+    .action-autofill { color: #fd7e14; }
+    .action-copy { color: #6c757d; }
+  </style>
+</head>
+<body>
+  <%- include('partials/header') %>
+  
+  <div class="audit-container">
+    <h1>Security Audit Trail</h1>
+    <p>This page shows a complete record of all actions related to your password vault. For your security, we log every access to your passwords.</p>
+    
+    <div class="filters">
+      <h3>Filter Audit Log</h3>
+      <form method="get" action="/passwords/audit-trail">
+        <div class="filter-row">
+          <div class="filter-group">
+            <label for="action">Action Type:</label>
+            <select id="action" name="action">
+              <option value="">All Actions</option>
+              <option value="view" <%= filters.action === 'view' ? 'selected' : '' %>>View</option>
+              <option value="create" <%= filters.action === 'create' ? 'selected' : '' %>>Create</option>
+              <option value="update" <%= filters.action === 'update' ? 'selected' : '' %>>Update</option>
+              <option value="delete" <%= filters.action === 'delete' ? 'selected' : '' %>>Delete</option>
+              <option value="export" <%= filters.action === 'export' ? 'selected' : '' %>>Export</option>
+              <option value="autofill" <%= filters.action === 'autofill' ? 'selected' : '' %>>Autofill</option>
+              <option value="copy" <%= filters.action === 'copy' ? 'selected' : '' %>>Copy</option>
+            </select>
+          </div>
+          
+          <div class="filter-group">
+            <label for="dateFrom">From Date:</label>
+            <input type="date" id="dateFrom" name="dateFrom" value="<%= filters.dateFrom || '' %>">
+          </div>
+          
+          <div class="filter-group">
+            <label for="dateTo">To Date:</label>
+            <input type="date" id="dateTo" name="dateTo" value="<%= filters.dateTo || '' %>">
+          </div>
+        </div>
+        
+        <button type="submit">Apply Filters</button>
+        <a href="/passwords/audit-trail" class="button secondary">Clear Filters</a>
+      </form>
+    </div>
+    
+    <% if (auditLogs.length === 0) { %>
+      <div class="empty-state">
+        <p>No audit records found for the selected filters.</p>
+      </div>
+    <% } else { %>
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Action</th>
+            <th>Password Title</th>
+            <th>Website</th>
+            <th>Device</th>
+            <th>Location</th>
+            <th>IP Address</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% auditLogs.forEach(log => { %>
+            <tr class="audit-row">
+              <td><%= log.formattedTime %></td>
+              <td class="action-<%= log.action.toLowerCase().split(' ')[0] %>"><%= log.action %></td>
+              <td><%= log.passwordTitle %></td>
+              <td><%= log.website %></td>
+              <td><%= log.device %></td>
+              <td><%= log.location %></td>
+              <td><%= log.ipAddress %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      
+      <div class="pagination">
+        <% if (pagination.pages > 1) { %>
+          <% if (pagination.current > 1) { %>
+            <a href="?page=<%= pagination.current - 1 %>&action=<%= filters.action || '' %>&dateFrom=<%= filters.dateFrom || '' %>&dateTo=<%= filters.dateTo || '' %>">« Previous</a>
+          <% } %>
+          
+          <span>Page <%= pagination.current %> of <%= pagination.pages %></span>
+          
+          <% if (pagination.current < pagination.pages) { %>
+            <a href="?page=<%= pagination.current + 1 %>&action=<%= filters.action || '' %>&dateFrom=<%= filters.dateFrom || '' %>&dateTo=<%= filters.dateTo || '' %>">Next »</a>
+          <% } %>
+        <% } %>
+      </div>
+    <% } %>
+    
+    <div class="security-info">
+      <h3>About This Feature</h3>
+      <p>The Security Audit Trail is a unique feature of our password manager that provides complete transparency about how your passwords are accessed. Unlike commercial password managers that provide limited or no access logs, we show you:</p>
+      <ul>
+        <li>Every time a password is viewed, used, or modified</li>
+        <li>The exact device and location used to access your passwords</li>
+        <li>Detailed timestamps for security forensics if needed</li>
+      </ul>
+      <p>This level of transparency puts you in control of your security and helps identify any unauthorized access attempts.</p>
+    </div>
+  </div>
+  
+  <%- include('partials/footer') %>
+  
+  <script>
+    // Add any client-side filtering or functionality
+  </script>
+</body>
+</html>

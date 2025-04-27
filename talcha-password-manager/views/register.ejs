@@ -1,0 +1,146 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow mt-5">
+        <div class="card-body p-5">
+          <h2 class="text-center mb-4">Create an Account</h2>
+          
+          <% if (locals.error) { %>
+            <div class="alert alert-danger" role="alert">
+              <%= error %>
+            </div>
+          <% } %>
+          
+          <% if (locals.feedback && locals.feedback.length > 0) { %>
+            <div class="alert alert-warning" role="alert">
+              <strong>Password feedback:</strong>
+              <ul class="mb-0 mt-2">
+                <% feedback.forEach(item => { %>
+                  <li><%= item %></li>
+                <% }) %>
+              </ul>
+            </div>
+          <% } %>
+          
+          <form action="/auth/register" method="POST">
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="username" 
+                name="username" 
+                value="<%= locals.username || '' %>" 
+                required
+              >
+            </div>
+            
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input 
+                type="email" 
+                class="form-control" 
+                id="email" 
+                name="email" 
+                value="<%= locals.email || '' %>" 
+                required
+              >
+            </div>
+            
+            <div class="mb-3">
+              <label for="password" class="form-label">Master Password</label>
+              <div class="input-group">
+                <input 
+                  type="password" 
+                  class="form-control" 
+                  id="password" 
+                  name="password" 
+                  required
+                >
+                <button class="btn btn-outline-secondary toggle-password" type="button">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+              <div class="mt-2">
+                <div class="progress" style="height: 5px;">
+                  <div id="password-strength-meter" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+                <small id="password-strength-text" class="form-text"></small>
+              </div>
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">Register</button>
+            </div>
+          </form>
+          
+          <div class="text-center mt-3">
+            <p>Already have an account? <a href="/auth/login">Login</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toggle password visibility
+  document.querySelector('.toggle-password').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const icon = this.querySelector('i');
+    
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      icon.classList.remove('bi-eye');
+      icon.classList.add('bi-eye-slash');
+    } else {
+      passwordInput.type = 'password';
+      icon.classList.remove('bi-eye-slash');
+      icon.classList.add('bi-eye');
+    }
+  });
+  
+  // Check password strength
+  const passwordInput = document.getElementById('password');
+  const strengthMeter = document.getElementById('password-strength-meter');
+  const strengthText = document.getElementById('password-strength-text');
+  
+  passwordInput.addEventListener('input', function() {
+    if (this.value === '') {
+      strengthMeter.style.width = '0%';
+      strengthMeter.className = 'progress-bar';
+      strengthText.textContent = '';
+      return;
+    }
+    
+    fetch('/passwords/check-strength', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ password: this.value })
+    })
+    .then(response => response.json())
+    .then(data => {
+      strengthMeter.style.width = `${data.score}%`;
+      strengthText.textContent = data.strengthCategory;
+      
+      // Update classes based on strength
+      strengthMeter.className = 'progress-bar';
+      if (data.score < 30) {
+        strengthMeter.classList.add('bg-danger');
+      } else if (data.score < 70) {
+        strengthMeter.classList.add('bg-warning');
+      } else {
+        strengthMeter.classList.add('bg-success');
+      }
+    })
+    .catch(error => {
+      console.error('Error checking password strength:', error);
+    });
+  });
+</script>
+
+<%- include('partials/footer') %>

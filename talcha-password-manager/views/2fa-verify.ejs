@@ -1,0 +1,71 @@
+<%- include('partials/header') %>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow">
+        <div class="card-body p-5">
+          <h2 class="text-center mb-4">Two-Factor Authentication</h2>
+          
+          <% if (locals.error) { %>
+            <div class="alert alert-danger" role="alert">
+              <%= error %>
+            </div>
+          <% } %>
+          
+          <div class="text-center mb-4">
+            <i class="bi bi-shield-lock fs-1 text-primary"></i>
+            <p class="mt-3">Hello <%= locals.username %>, please enter the verification code from your authenticator app to continue.</p>
+          </div>
+          
+          <form action="/auth/2fa-verify" method="POST">
+            <div class="mb-3">
+              <label for="token" class="form-label">Authentication Code</label>
+              <input type="text" class="form-control form-control-lg text-center" id="token" name="token" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="off" autofocus>
+            </div>
+            
+            <div class="d-grid mb-3">
+              <button type="submit" class="btn btn-primary">Verify</button>
+            </div>
+          </form>
+          
+          <div class="text-center mt-4">
+            <p class="mb-2">Don't have access to your authenticator app?</p>
+            <button type="button" class="btn btn-link p-0" data-bs-toggle="collapse" data-bs-target="#backupCodeForm">
+              Use a backup code
+            </button>
+            
+            <div class="collapse mt-3" id="backupCodeForm">
+              <form action="/auth/2fa-verify" method="POST">
+                <div class="mb-3">
+                  <label for="backupCode" class="form-label">Backup Code</label>
+                  <input type="text" class="form-control" id="backupCode" name="backupCode" placeholder="Enter backup code" autocomplete="off">
+                </div>
+                
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-outline-secondary">Use Backup Code</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Auto-focus on token input
+    document.getElementById('token').focus();
+    
+    /*// Automatically submit when 6 digits are entered
+    document.getElementById('token').addEventListener('input', function() {
+      if (this.value.length === 6) {
+        this.form.submit();
+      }
+    });*/
+  });
+</script>
+
+<%- include('partials/footer') %>

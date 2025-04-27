@@ -1,0 +1,83 @@
+<%- include('partials/header') %>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+      <div class="card shadow">
+        <div class="card-body p-5">
+          <h2 class="text-center mb-4">Set Up Two-Factor Authentication</h2>
+          
+          <% if (locals.error) { %>
+            <div class="alert alert-danger" role="alert">
+              <%= error %>
+            </div>
+          <% } %>
+          
+          <div class="alert alert-info">
+            <p><strong>Enhance your account security with 2FA</strong></p>
+            <p>Two-factor authentication adds an extra layer of security to your account by requiring a verification code in addition to your password.</p>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6 text-center mb-4">
+              <h5 class="mb-3">Step 1: Scan QR Code</h5>
+              <p>Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)</p>
+              <div class="qr-container border p-3 d-inline-block">
+                <img src="<%= qrCode %>" alt="QR Code" class="img-fluid">
+              </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+              <h5 class="mb-3">Step 2: Manual Entry (if needed)</h5>
+              <p>If you can't scan the QR code, enter this key manually in your app:</p>
+              <div class="input-group mb-3">
+                <input type="text" class="form-control" id="secret-key" value="<%= secret %>" readonly>
+                <button class="btn btn-outline-secondary" id="copy-key" type="button">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+              
+              <div class="mt-4">
+                <h5 class="mb-3">Step 3: Verify Setup</h5>
+                <p>Enter the 6-digit code from your authenticator app to verify setup:</p>
+                <form action="/auth/2fa-setup" method="POST">
+                  <div class="mb-3">
+                    <input type="text" class="form-control" id="token" name="token" placeholder="Enter 6-digit code" required autocomplete="off">
+                  </div>
+                  
+                  <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Verify and Enable 2FA</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          
+          <div class="text-center mt-3">
+            <a href="/passwords/profile" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Copy secret key
+    document.getElementById('copy-key').addEventListener('click', function() {
+      const secretKeyInput = document.getElementById('secret-key');
+      secretKeyInput.select();
+      document.execCommand('copy');
+      
+      // Show copied feedback
+      const originalHTML = this.innerHTML;
+      this.innerHTML = '<i class="bi bi-check"></i> Copied';
+      setTimeout(() => {
+        this.innerHTML = originalHTML;
+      }, 1500);
+    });
+  });
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,276 @@
+<%- include('partials/header') %>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="/passwords/dashboard">
+              <i class="bi bi-key me-2"></i>
+              All Passwords
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/passwords/add">
+              <i class="bi bi-plus-circle me-2"></i>
+              Add Password
+            </a>
+          </li>
+          
+          
+          <li class="nav-item">
+            <a class="nav-link active" href="/passwords/audit-trail">
+              <i class="bi bi-person me-2"></i>
+              Audit Trail
+            </a>
+          </li>
+          
+          <li class="nav-item">
+            <a class="nav-link active" href="/passwords/profile">
+              <i class="bi bi-person me-2"></i>
+              My Profile
+            </a>
+          </li>
+
+          <li class="nav-item mt-3">
+            <a class="nav-link text-danger" href="/auth/logout">
+              <i class="bi bi-box-arrow-right me-2"></i>
+              Logout
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    
+    <!-- Main content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">My Profile</h1>
+      </div>
+      
+      <% if (locals.error) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <%= error %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      <% } %>
+      
+      <% if (locals.success) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <%= success %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      <% } %>
+      
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="mb-0">Account Information</h5>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label class="form-label text-muted">Username</label>
+                <div class="fw-bold"><%= user.username %></div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label text-muted">Email</label>
+                <div class="fw-bold"><%= user.email %></div>
+              </div>
+              <div class="d-grid mt-4">
+                <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                  <i class="bi bi-key me-2"></i>Change Master Password
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="mb-0">Two-Factor Authentication</h5>
+            </div>
+            <div class="card-body">
+              <% if (user.isTwoFactorEnabled) { %>
+                <div class="alert alert-success d-flex align-items-center" role="alert">
+                  <i class="bi bi-shield-check fs-4 me-2"></i>
+                  <div>
+                    <strong>2FA is enabled</strong>
+                    <p class="mb-0">Your account has an extra layer of security.</p>
+                  </div>
+                </div>
+                <p>Two-factor authentication is currently protecting your account. You need both your password and a verification code to sign in.</p>
+                <div class="d-grid">
+                  <button class="btn btn-outline-danger" type="button" data-bs-toggle="modal" data-bs-target="#disable2FAModal">
+                    <i class="bi bi-shield-x me-2"></i>Disable 2FA
+                  </button>
+                </div>
+              <% } else { %>
+                <div class="alert alert-warning d-flex align-items-center" role="alert">
+                  <i class="bi bi-shield-exclamation fs-4 me-2"></i>
+                  <div>
+                    <strong>2FA is not enabled</strong>
+                    <p class="mb-0">Your account could be more secure.</p>
+                  </div>
+                </div>
+                <p>Add an extra layer of security to your account by enabling two-factor authentication. This will require you to enter a verification code in addition to your password when signing in.</p>
+                <div class="d-grid">
+                  <a href="/auth/2fa-setup" class="btn btn-primary">
+                    <i class="bi bi-shield-plus me-2"></i>Enable 2FA
+                  </a>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="/passwords/change-password" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title" id="changePasswordModalLabel">Change Master Password</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="currentPassword" class="form-label">Current Password</label>
+            <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+            <button class="btn btn-outline-secondary password-toggle" type="button" onclick="togglePassword('currentPassword')">
+              <i class="bi bi-eye"></i>
+            </button>
+
+          </div>
+          <div class="mb-3">
+            <label for="newPassword" class="form-label">New Password</label>
+            <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+            <button class="btn btn-outline-secondary password-toggle" type="button" onclick="togglePassword('newPassword')">
+                <i class="bi bi-eye"></i>
+              </button>
+
+            <div class="mt-2">
+              <div class="progress" style="height: 5px;">
+                <div id="password-strength-meter" class="progress-bar" role="progressbar"></div>
+              </div>
+              <small id="password-strength-text" class="form-text"></small>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="confirmNewPassword" class="form-label">Confirm New Password</label>
+            <input type="password" class="form-control" id="confirmNewPassword" name="confirmNewPassword" required>
+            <button class="btn btn-outline-secondary password-toggle" type="button" onclick="togglePassword('confirmNewPassword')">
+              <i class="bi bi-eye"></i>
+              </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Change Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Disable 2FA Modal -->
+<div class="modal fade" id="disable2FAModal" tabindex="-1" aria-labelledby="disable2FAModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="/auth/2fa-disable" method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title" id="disable2FAModalLabel">Disable Two-Factor Authentication</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-warning">
+            <strong>Warning:</strong> Disabling two-factor authentication will make your account less secure.
+          </div>
+          <p>Please enter your master password to confirm:</p>
+          <div class="mb-3">
+            <label for="password" class="form-label">Master Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Disable 2FA</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Check password strength for new password
+    const passwordInput = document.getElementById('newPassword');
+    const strengthMeter = document.getElementById('password-strength-meter');
+    const strengthText = document.getElementById('password-strength-text');
+    
+    if (passwordInput) {
+      passwordInput.addEventListener('input', function() {
+        if (this.value === '') {
+          strengthMeter.style.width = '0%';
+          strengthMeter.className = 'progress-bar';
+          strengthText.textContent = '';
+          return;
+        }
+        
+        fetch('/passwords/check-strength', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ password: this.value })
+        })
+        .then(response => response.json())
+        .then(data => {
+          strengthMeter.style.width = data.score + '%';
+          strengthText.textContent = data.strengthCategory;
+          
+          // Update classes based on strength
+          strengthMeter.className = 'progress-bar';
+          if (data.score < 30) {
+            strengthMeter.classList.add('bg-danger');
+          } else if (data.score < 70) {
+            strengthMeter.classList.add('bg-warning');
+          } else {
+            strengthMeter.classList.add('bg-success');
+          }
+        })
+        .catch(error => {
+          console.error('Error checking password strength:', error);
+        });
+      });
+    }
+  });
+//eye button
+
+function togglePassword(inputId) {
+  const passwordField = document.getElementById(inputId);
+  const button = event.currentTarget;
+  const icon = button.querySelector('i');
+  
+  if (passwordField.type === 'password') {
+    passwordField.type = 'text';
+    icon.classList.remove('bi-eye');
+    icon.classList.add('bi-eye-slash');
+  } else {
+    passwordField.type = 'password';
+    icon.classList.remove('bi-eye-slash');
+    icon.classList.add('bi-eye');
+  }
+}
+
+
+</script>
+
+<%- include('partials/footer') %>

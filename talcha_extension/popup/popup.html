@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TALCHA</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>TALCHA</h1>
+    
+    <div id="credentials-container">
+      <div id="site-info">
+        <h2 id="current-domain">Current Site</h2>
+      </div>
+      
+      <div id="found-credentials" class="hidden">
+        <div class="credential-item">
+          <div class="credential-details">
+            <p><strong>Username:</strong> <span id="username"></span></p>
+            <div class="password-field">
+              <strong>Password:</strong>
+              <input type="password" id="password" readonly>
+              <button id="show-password">Show</button>
+              <button id="copy-password">Copy</button>
+              <button id="autofill">Autofill</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div id="no-credentials" class="hidden">
+        <p>No saved credentials for this site.</p>
+      </div>
+      
+      <div id="password-generator">
+        <h3>Generate Password</h3>
+        <div class="input-group">
+          <label for="password-length">Length:</label>
+          <input type="number" id="password-length" min="8" max="32" value="16">
+          <button id="generate-btn">Generate</button>
+        </div>
+        <div class="input-group">
+          <input type="text" id="generated-password" readonly>
+          <button id="copy-generated">Copy</button>
+          <button id="save-generated">Save</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <button id="open-manager">Open Password Manager</button>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

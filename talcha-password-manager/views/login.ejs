@@ -1,0 +1,82 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow mt-5">
+        <div class="card-body p-5">
+          <!-- Logo-->
+           <div class="text-center mb-3">
+            <img src="/images/logo.png" alt="Talcha Logo" style="max-width:180px; width:100%; height: auto;">
+           </div>
+          <h2 class="text-center mb-4">Talcha Password Manager</h2>
+          
+          <% if (locals.error) { %>
+            <div class="alert alert-danger" role="alert">
+              <%= error %>
+            </div>
+          <% } %>
+          
+          <form action="/auth/login" method="POST">
+            <div class="mb-3">
+              <label for="username" class="form-label">Username or Email</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="username" 
+                name="username" 
+                value="<%= locals.username || '' %>" 
+                required
+              >
+            </div>
+            
+            <div class="mb-3">
+              <label for="password" class="form-label">Master Password</label>
+              <div class="input-group">
+                <input 
+                  type="password" 
+                  class="form-control" 
+                  id="password" 
+                  name="password" 
+                  required
+                >
+                <button class="btn btn-outline-secondary toggle-password" type="button">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+          </form>
+          
+          <div class="text-center mt-3">
+            <p>Don't have an account? <a href="/auth/register">Register</a></p>
+          <!--</div>
+          <a href="/auth/forgot-password">Forgot password?</a>
+        </div>-->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toggle password visibility
+  document.querySelector('.toggle-password').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const icon = this.querySelector('i');
+    
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      icon.classList.remove('bi-eye');
+      icon.classList.add('bi-eye-slash');
+    } else {
+      passwordInput.type = 'password';
+      icon.classList.remove('bi-eye-slash');
+      icon.classList.add('bi-eye');
+    }
+  });
+</script>
+
+<%- include('partials/footer') %>

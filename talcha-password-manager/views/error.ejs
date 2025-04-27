@@ -1,0 +1,18 @@
+<%- include('partials/header') %>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body text-center">
+          <h1 class="text-danger">Error</h1>
+          <p class="lead"><%= error %></p>
+          <a href="javascript:history.back()" class="btn btn-outline-secondary">Go Back</a>
+          <a href="/" class="btn btn-primary">Go Home</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
