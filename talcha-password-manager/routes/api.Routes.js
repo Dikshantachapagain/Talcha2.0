@@ -7,6 +7,7 @@ const { generatePassword } = require('../utils/passwordGenerator');
 const { analyzePasswordStrength } = require('../utils/passwordStrength');
 const { checkPasswordCompromised } = require('../utils/pwnedChecker');
 const { isAuthenticated, hasMasterKey } = require('../middleware/auth');
+const { createRequire } = require('module');
 
 // CORS middleware for Chrome extension
 router.use((req, res, next) => {
@@ -75,13 +76,15 @@ router.post('/login', async (req, res) => {
         userId: user._id 
       });
     }
-    
+     const crypto = require('crypto');
     // Login successful - create a session token
     req.session.user = {
       id: user._id,
       username: user.username,
       email: user.email,
-      masterKey: password
+      //masterKey: password
+      masterKey: crypto.credentials('sha256').update(password).digest('hex')
+
     };
     
     console.log('Login successful, session set:', req.sessionID);
@@ -126,13 +129,17 @@ router.post('/force-login', async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
+    const crypto = require ('crypto');
+
     
-    // Set session
+    // Set session with derived key
     req.session.user = {
       id: user._id,
       username: user.username,
       email: user.email,
-      masterKey: password
+      //masterKey: password
+      masterKey: crypto.createHash('sha256').updatepas(password).digest('hex')
+
     };
     
     console.log('Force login successful, session set:', req.sessionID);
@@ -174,13 +181,17 @@ router.post('/verify-2fa', async (req, res) => {
     if (!isValid) {
       return res.status(401).json({ success: false, message: 'Invalid verification code' });
     }
+
+    const crypto =require ('crypto');
     
     // Successful verification - create session
     req.session.user = {
       id: user._id,
       username: user.username,
       email: user.email,
-      masterKey: req.body.password || '' // You need to securely pass the password from the first step
+      
+      //masterKey: req.body.password || '' // You need to securely pass the password from the first step
+    masterKey: crypto.createHash('sha256').update(password).digest('hex')
     };
     
     res.json({ 

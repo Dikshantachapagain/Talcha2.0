@@ -1,3 +1,4 @@
+const crypto = require ('crypto');
 const User = require('../models/User');
 const { analyzePasswordStrength } = require('../utils/passwordStrength');
 const { checkPasswordCompromised } = require('../utils/pwnedChecker');
@@ -196,39 +197,63 @@ exports.login = async (req, res) => {
         username
       });
     }
-    
+     // Create a hash of the password for secure storage in session
+     const derivedKey = crypto.createHash('sha256').update(password).digest('hex');
+
     // If 2FA is enabled, redirect to 2FA verification
     if (user.isTwoFactorEnabled) {
+      
       // Create a temporary session to indicate successful first step
+      //generate a temporary token for secure 2fa flow (without storing the password)
+      //const crypto = require('crypto');
+
       req.session.twoFactorAuth = {
         userId: user._id,
         username: user.username,
         remember: req.body.remember === 'on',
-        password: password //Store the password
+        derivedKey: derivedKey
+
+        //derivedkey:crypto.createHash('sha256').update(password).digest('hex')
+
+        //password: password //Store the password
       };
       
       return res.redirect('/auth/2fa-verify');
     }
     
-    // Set user session
+   
+
+    // Set user session with deirved key instead fo raw password
     req.session.user = {
       id: user._id,
       username: user.username,
       email: user.email,
       // Store master key derived from password in session
       // This will be used to decrypt passwords
-      masterKey: password
+      masterKey: derivedKey
+      //masterkey: crypto.createHash('sha256').update(password).digest('hex')
     };
     
     // Set remember me cookie if selected
     if (req.body.remember === 'on') {
       req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
     }
-    
+
+  
     console.log('User logged in successfully:', user.username);
     console.log('Session data set:', req.session.user);
+
+    req.session.save(err => {
+      if (err) {
+        console.error('Error saving session:', err);
+        return res.status(500).render('login', {
+          error: 'An error occurred during login'
+        });
+      }
+
     
     return res.redirect('/passwords/dashboard');
+    });
     
   } catch (error) {
     console.error('Login error:', error);
@@ -320,7 +345,8 @@ exports.verifyTwoFactor = async (req, res) => {
       id: user._id,
       username: user.username,
       email: user.email,
-      masterKey: req.session.twoFactorAuth.password || ''
+      masterkey: req.session.twoFactorAuth.derivedkey//Using  the derived key instead of password
+      //masterKey: req.session.twoFactorAuth.password || ''
     };
     
     // Set remember me cookie if selected

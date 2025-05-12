@@ -1,15 +1,23 @@
+// This goes in encryption.js
 const crypto = require('crypto');
 
 /**
  * Encrypts data using AES-256-CBC
  * @param {string} text - Text to encrypt
- * @param {string} masterKey - Master key for encryption (derived from user's master password)
+ * @param {string} masterKeyOrDerivedKey - Either a raw master password or a derived key (SHA-256 hash)
  * @returns {string} - Encrypted data in format: iv:encryptedData
  */
-const encrypt = (text, masterKey) => {
+const encrypt = (text, masterKeyOrDerivedKey) => {
   try {
-    // Creates a key from the master key using SHA-256
-    const key = crypto.createHash('sha256').update(masterKey).digest();
+    // Check if the input is already a derived key (SHA-256 hash in hex format is 64 characters)
+    let key;
+    if (masterKeyOrDerivedKey && masterKeyOrDerivedKey.length === 64 && /^[0-9a-f]+$/i.test(masterKeyOrDerivedKey)) {
+      // It's already a derived key in hex format, convert to Buffer
+      key = Buffer.from(masterKeyOrDerivedKey, 'hex');
+    } else {
+      // It's a raw password, create a key by hashing it
+      key = crypto.createHash('sha256').update(masterKeyOrDerivedKey).digest();
+    }
     
     // Generates a random initialization vector
     const iv = crypto.randomBytes(16);
@@ -32,13 +40,20 @@ const encrypt = (text, masterKey) => {
 /**
  * Decrypts data encrypted with AES-256-CBC
  * @param {string} encryptedData - Encrypted data in format: iv:encryptedData
- * @param {string} masterKey - Master key for decryption (derived from user's master password)
+ * @param {string} masterKeyOrDerivedKey - Either a raw master password or a derived key (SHA-256 hash)
  * @returns {string} - Decrypted data
  */
-const decrypt = (encryptedData, masterKey) => {
+const decrypt = (encryptedData, masterKeyOrDerivedKey) => {
   try {
-    // Creates a key from the master key using SHA-256
-    const key = crypto.createHash('sha256').update(masterKey).digest();
+    // Check if the input is already a derived key (SHA-256 hash in hex format is 64 characters)
+    let key;
+    if (masterKeyOrDerivedKey && masterKeyOrDerivedKey.length === 64 && /^[0-9a-f]+$/i.test(masterKeyOrDerivedKey)) {
+      // It's already a derived key in hex format, convert to Buffer
+      key = Buffer.from(masterKeyOrDerivedKey, 'hex');
+    } else {
+      // It's a raw password, create a key by hashing it
+      key = crypto.createHash('sha256').update(masterKeyOrDerivedKey).digest();
+    }
     
     // Splits the IV and encrypted data
     const [ivHex, encrypted] = encryptedData.split(':');

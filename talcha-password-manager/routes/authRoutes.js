@@ -16,11 +16,6 @@ router.get('/login', isNotAuthenticated, authController.getLoginPage);
 router.post('/login', isNotAuthenticated, authController.login);
 router.get('/logout', authController.logout);
 
-/*// Password reset routes
-router.get('/forgot-password', isNotAuthenticated, authController.getForgotPasswordPage);
-router.post('/forgot-password', isNotAuthenticated, authController.forgotPassword);
-router.get('/reset-password/:token', isNotAuthenticated, authController.getResetPasswordPage);
-router.post('/reset-password', isNotAuthenticated, authController.resetPassword);*/
 
 // Two-factor authentication routes
 router.get('/2fa-verify', authController.getTwoFactorVerifyPage);
