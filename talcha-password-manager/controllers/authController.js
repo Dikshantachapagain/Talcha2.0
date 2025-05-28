@@ -345,7 +345,7 @@ exports.verifyTwoFactor = async (req, res) => {
       id: user._id,
       username: user.username,
       email: user.email,
-      masterkey: req.session.twoFactorAuth.derivedkey//Using  the derived key instead of password
+      masterKey: req.session.twoFactorAuth.derivedKey//Using  the derived key instead of password
       //masterKey: req.session.twoFactorAuth.password || ''
     };
     
@@ -353,19 +353,22 @@ exports.verifyTwoFactor = async (req, res) => {
     if (req.session.twoFactorAuth.remember) {
       req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
     }
+
+ // Clear 2FA session
+    delete req.session.twoFactorAuth;
+
     //Explicitly save the session before redirecting
     req.session.save(err =>{
       if(err){
         console.error('Error saving session:',err);
         return res.status(500).render('2fa-verify',{
           error: 'An error occured during verification',
-          username: user.name
+          username: user.username
         });
       }
     })
-    // Clear 2FA session
-    delete req.session.twoFactorAuth;
-    
+   
+    console.log('session saved successfully:',req.session.user);
     return res.redirect('/passwords/dashboard');
     
   } catch (error) {
