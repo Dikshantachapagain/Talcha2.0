@@ -18,6 +18,6 @@ router.post('/edit/:id', passwordController.updatePassword);
 router.post('/delete/:id', passwordController.deletePassword);
 router.post('/generate', passwordController.generatePassword);
 router.post('/check-strength', passwordController.checkPasswordStrength);
-router.post('/check-compromised', passwordController.checkPasswordCompromised);
+router.post('/check-ompromised', passwordController.checkPasswordCompromised);
 
 module.exports = router;

@@ -13,6 +13,7 @@ exports.getAuditTrail = async (req, res) => {
     
     if (req.query.action) {
       filter.action = req.query.action;
+      
     }
     
     if (req.query.dateFrom) {
